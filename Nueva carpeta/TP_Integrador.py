@@ -1,10 +1,11 @@
 
-
-## Base De datos simulada
+## ====================================================================
+## Base de datos simulada
+## ====================================================================
 
 base_datos_empleados = {
-    "1234577": {"Nombre": "Joaquin Miranda", "Dias_disponibles": 14},
-    "156768": {"Nombre": "Maria Juana", "Dias_disponibles": 21}
+    "1234567": {"Nombre": "Joaquin Miranda", "Dias_disponibles": 14},
+    "7891011": {"Nombre": "Maria Juana", "Dias_disponibles": 21}
 }
 
 tramites = []
@@ -12,10 +13,11 @@ tramites = []
 def iniciar_bot():
     estado = 1
     dni_usuario = ""
+    dias_pedidos = 0
 
     while True:
         if estado == 1:
-            dni = input("Ingrese su dni: ")
+            dni = input("Hola, Ingrese su dni: ")
     
             if dni in base_datos_empleados:
                 print("DNI encontrado")
@@ -30,7 +32,6 @@ def iniciar_bot():
 
             print(f"{nombre_empleado}, tenes {dias_totales} dias disponibles")
             entrada_dias = input("Cuantos dias te queres tomar?: ")
-
             
             try:
                 dias_pedidos = int(entrada_dias)
@@ -43,7 +44,29 @@ def iniciar_bot():
                 print("Por favor, ingrese un número válido.")
 
         elif estado == 3: 
-            fecha_inicio = input("Ingrese la fecha de inicio (dd/mm/aa): ")
+            fecha_inicio = input("Ingrese la fecha de inicio (dd/mm/aaaa): ")
+
+            partes = fecha_inicio.split("/")
+
+           
+            if len(partes) != 3:
+                print("[Bot]: Formato incorrecto. Debe usar barras para separar (dd/mm/aaaa).")
+                continue
+
+          
+            try: 
+                dia = int(partes[0])
+                mes = int(partes[1])
+                anio = int(partes[2])
+
+                if dia < 1 or dia > 31 or mes < 1 or mes > 12 or anio < 2026:
+                    print("[Bot]: Fecha lógica inválida. Revise los números.")
+                    continue
+        
+            except ValueError:
+                print("[Bot]: La fecha debe contener solo números enteros. No se permiten letras.")
+                continue
+            
             
             base_datos_empleados[dni_usuario]["Dias_disponibles"] -= dias_pedidos
             
@@ -62,3 +85,7 @@ def iniciar_bot():
             print("\n[Bot]: Gracias por usar el sistema de vacaciones. Cerrando sesión...\n")
             dni_usuario = ""
             estado = 1
+
+
+if __name__ == "__main__":
+    iniciar_bot()
