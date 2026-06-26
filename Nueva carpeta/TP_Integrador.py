@@ -1,3 +1,4 @@
+from datetime import datetime
 
 ## ====================================================================
 ## Base de datos simulada
@@ -17,14 +18,18 @@ def iniciar_bot():
 
     while True:
         if estado == 1:
-            dni = input("Hola, Ingrese su dni: ")
+            dni = input("Hola, Ingrese su DNI (o escriba 'salir'): ").strip()
+            
+            if dni.lower() == 'salir':
+                print("[Bot]: Programa finalizado.")
+                break
     
             if dni in base_datos_empleados:
                 print("DNI encontrado")
                 dni_usuario = dni
                 estado = 2
             else:
-                print("El dni no existe. Intente de nuevo")
+                print("El DNI no existe. Intente de nuevo.")
 
         elif estado == 2:
             dias_totales = base_datos_empleados[dni_usuario]["Dias_disponibles"]
@@ -36,39 +41,34 @@ def iniciar_bot():
             try:
                 dias_pedidos = int(entrada_dias)
 
-                if dias_pedidos <= dias_totales:
+                if dias_pedidos <= 0:
+                    print("Por favor, ingrese una cantidad mayor a 0.")
+                elif dias_pedidos <= dias_totales:
                     estado = 3
                 else:
-                    print("No tenes dias suficientes. Intenta otra cantidad")
+                    print("No tenes dias suficientes. Intenta otra cantidad.")
             except ValueError:
                 print("Por favor, ingrese un número válido.")
 
         elif estado == 3: 
-            fecha_inicio = input("Ingrese la fecha de inicio (dd/mm/aaaa): ")
+            fecha_inicio = input("Ingrese la fecha de inicio (dd/mm/aaaa): ").strip()
 
-            partes = fecha_inicio.split("/")
-
-           
-            if len(partes) != 3:
-                print("[Bot]: Formato incorrecto. Debe usar barras para separar (dd/mm/aaaa).")
-                continue
-
-          
-            try: 
-                dia = int(partes[0])
-                mes = int(partes[1])
-                anio = int(partes[2])
-
-                if dia < 1 or dia > 31 or mes < 1 or mes > 12 or anio < 2026:
-                    print("[Bot]: Fecha lógica inválida. Revise los números.")
+            
+            try:
+                fecha_validada = datetime.strptime(fecha_inicio, "%d/%m/%Y")
+                
+                #
+                if fecha_validada.year < 2026:
+                    print("[Bot]: El año debe ser 2026 o posterior.")
                     continue
-        
+                    
             except ValueError:
-                print("[Bot]: La fecha debe contener solo números enteros. No se permiten letras.")
+                print("[Bot]: Fecha inválida o formato incorrecto. Use dd/mm/aaaa (Ej: 15/07/2026).")
                 continue
             
-            
+           
             base_datos_empleados[dni_usuario]["Dias_disponibles"] -= dias_pedidos
+            
             
             tramites.append({
                 "dni": dni_usuario,
@@ -82,10 +82,15 @@ def iniciar_bot():
             estado = 4
 
         elif estado == 4:
-            print("\n[Bot]: Gracias por usar el sistema de vacaciones. Cerrando sesión...\n")
-            dni_usuario = ""
-            estado = 1
-
+            print("\n[Bot]: Gracias por usar el sistema de vacaciones.")
+            opcion = input("¿Desea realizar otro trámite? (s/n): ").strip().lower()
+            
+            if opcion == 's':
+                dni_usuario = ""
+                estado = 1
+            else:
+                print("\n[Bot]: Cerrando sesión. ¡Hasta luego!\n")
+                break
 
 if __name__ == "__main__":
     iniciar_bot()
